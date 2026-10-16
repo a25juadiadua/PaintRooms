@@ -14,7 +14,6 @@ socket.on ('connect', () =>{
 </script>
 
 <template>
-  <h1>PaintRooms</h1>
 
-  <Lobby></Lobby>
+  <Lobby :socket = socket></Lobby>
 </template>
