@@ -43,18 +43,30 @@ io.on('connection', (socket) => {
 
             Salas[sala].Usuarios.set(socket.id, nombre);
 
+            console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
+            console.log("-------------------------------------------------------");
             console.log("Salas: " , Salas);
 
         }else{
-            socket.emit("error:sala", sala);
+            socket.emit("error:sala", sala, "No s'ha pogut fer la sala perque ja esta creada");
+            console.log("No se ha creado la sala porque ya esta creada de antes");
         }
 
     }else{
 
-        
 
-        if(Salas[sala]  && Salas[sala].Users < Salas[sala].MaxPlayer){
+        if(!Salas[sala]){
+                
+                socket.emit("error:sala", sala, "No s'ha encontrat la sala");
+                console.log("Sala no encontrada y usuario no añadido");
+            }
+        else if(Salas[sala].Users > Salas[sala].MaxPlayer){
+                socket.emit("error:sala", sala, "La sala esta al maxim de jugadors");
+                console.log("Sala encontrada pero supera el limite de jugadores");
+            }
+
+        else{
 
             Usuarios[socket.id] = {
                 name: nombre,
@@ -65,11 +77,10 @@ io.on('connection', (socket) => {
             Salas[sala].Usuarios.set(socket.id, nombre);
             Salas[sala].Users++;
 
-
+            console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
+            console.log("-------------------------------------------------------------------");
             console.log("Salas: " , Salas);
-        }else{
-            socket.emit("error:sala", sala);
         }
     }
     });

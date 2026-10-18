@@ -24,6 +24,7 @@ function enviarDatos(nombre, opcionSalaUsuario,sala){
 }
 
 
+
 </script>
 <template>
     <div class="container-fluid min-vh-100 d-flex flex-column justify-content-center align-items-center py-5 px-3"
