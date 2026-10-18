@@ -107,7 +107,7 @@ io.on('connection', (socket) => {
     
             let sala = Usuarios[socket.id].room;
     
-            socket.to(sala).emit('dibujo:inicio',{ x, y});
+            io.to(sala).emit('dibujo:inicio',{ x, y});
         }else{
             socket.emit(
         "error:usuario",
@@ -126,11 +126,7 @@ io.on('connection', (socket) => {
         
             let sala = Usuarios[socket.id].room;
         
-            io.to(sala).emit('dibujo:mover', {
-                id: socket.id,
-                nombre: Usuarios[socket.id].name,
-                posX: x,
-                posY: y});
+            io.to(sala).emit('dibujo:mover', { x, y });
         }else{
             socket.emit(
         "error:usuario",
@@ -161,7 +157,7 @@ socket.on("cursor:mover", (datos) => {
         "Ha habido un error con el usuario"
     );
     }
-})
+});
 
     //------------------------------------- DESCONEXION DE USUARIO ---------------------------------------
 
@@ -171,6 +167,7 @@ socket.on("cursor:mover", (datos) => {
             sala = Usuarios[socket.id].room;
 
             console.log("Sala encontrada");
+            io.to(sala).emit("cursor:eliminar", (socket.id));
         Salas[sala].Usuarios.delete(socket.id);
         Salas[sala].Users--;
         console.log("Usuario eliminado de la sala y contador de sala borrados");

@@ -91,70 +91,212 @@ onMounted (() => {
         countPlayer.value = jugadoresSala;
     });
 
-    props.socket.on("cursor:mover", (datos) =>{
-        cursores.value[datos.id] = {
-            nombre: datos.nombre,
-            posX: datos.posX,
-            posY: datos.posY
-        };
-        
+   props.socket.on("cursor:mover", (datos) => {
+    let color;
 
-    });
+    if (cursores.value[datos.id]) {
+        color = cursores.value[datos.id].color;
+    } else {
+        color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    }
+
+    cursores.value[datos.id] = {
+        nombre: datos.nombre,
+        posX: datos.posX,
+        posY: datos.posY,
+        color: color
+    };
+});
+
+
+props.socket.on("cursor:eliminar", (id) => {
+    delete cursores.value[id];
+});
 
 })
 </script>
 
-<template>
 
+<template>
     <div class="canvas-container">
 
         <canvas ref="canvas"
-        @mousedown="empezarDibujo"
-        @mousemove="moverDibujo"
-        @mouseup="terminarDibujo()">
-    </canvas>
-    
+            @mousedown="empezarDibujo"
+            @mousemove="moverDibujo"
+            @mouseup="terminarDibujo()">
+        </canvas>
 
-    <div class="cursor-layer">
-        <div v-for="(cursor, id) in cursores" :key="id"
-            class="cursor"
-            :style="{ left: cursor.posX + 'px', top: cursor.posY + 'px' }">
-        {{ cursor.nombre }}</div>
+        <div class="cursor-layer">
+            <div v-for="(cursor, id) in cursores" :key="id"
+                class="cursor"
+                :style="{
+                    left: cursor.posX + 'px',
+                    top: cursor.posY + 'px',
+                    color: cursor.color
+                }">
+                <span class="cursor-point"></span>
+                {{ cursor.nombre }}
+            </div>
+        </div>
+
+        <nav class="room-panel">
+            <div class="room-heading">
+                <span class="status-dot"></span>
+                <span>SALA ACTIVA</span>
+            </div>
+
+            <h2>{{ nombreRoom }}</h2>
+
+            <div class="room-info">
+                <div class="info-item">
+                    <span>Jugadores</span>
+                    <strong>{{ countPlayer }} / {{ maxPlayers }}</strong>
+                </div>
+
+                <div class="player-bar">
+                    <div class="player-progress"
+                        :style="{ width: (maxPlayers ? countPlayer / maxPlayers * 100 : 0) + '%' }">
+                    </div>
+                </div>
+            </div>
+
+            <p class="room-tip">
+                <span class="tip-icon">✎</span>
+                Mantén pulsado para dibujar
+            </p>
+        </nav>
+
     </div>
-</div>
-
-
-    <nav>
-        <p>Nom Sala: {{ nombreRoom }}</p>
-        <p>Maxim jugadors: {{ maxPlayers }}</p>
-        <p>Jugadors: {{ countPlayer }}</p>
-    </nav>
-
-
 </template>
 
 <style scoped>
-canvas {
-  display: block;
-  width: 100vw;
-  height: 100vh;
-}
-
 .canvas-container {
     position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #f5f3ef;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
 }
 
 .cursor-layer {
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
 }
 
 .cursor {
     position: absolute;
-    background: yellow;
-    padding: 2px 5px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid currentColor;
+    box-shadow: 0 2px 6px #00000012;
     font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transform: translate(5px, 8px);
+}
+
+.cursor-point {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.room-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 230px;
+    padding: 20px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e3e5e8;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px #172b4d12;
+    color: #172b4d;
+    font-family: Arial, sans-serif;
+}
+
+.room-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #667085;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2eaf7d;
+}
+
+.room-panel h2 {
+    margin: 12px 0 20px;
+    font-size: 23px;
+    overflow-wrap: anywhere;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.info-item span {
+    color: #667085;
+}
+
+.info-item strong {
+    color: #172b4d;
+}
+
+.player-bar {
+    height: 6px;
+    margin-top: 10px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #e9edf0;
+}
+
+.player-progress {
+    height: 100%;
+    border-radius: 10px;
+    background: #2eaf7d;
+    transition: width 0.2s ease;
+}
+
+.room-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid #eef0f2;
+    color: #667085;
+    font-size: 11px;
+}
+
+.tip-icon {
+    color: #2eaf7d;
+    font-size: 17px;
 }
 </style>
