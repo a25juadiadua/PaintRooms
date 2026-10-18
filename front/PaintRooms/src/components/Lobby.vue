@@ -20,11 +20,20 @@ function opcionUsuarioSala(){
 
 function enviarDatos(nombre, opcionSalaUsuario,sala){
     console.log ("Datos Usuario: ", username.value, opcionSalaUsuario, sala );
+    
+    guardarNombreSala();
+
     props.socket.emit("nombre:opcion:sala", nombre, opcionSalaUsuario, sala);
 
-    
 }
 
+function guardarNombreSala(){
+
+    props.socket.on("nombre:ok", () => {
+        localStorage.setItem("nombreUsuario", username.value);
+        localStorage.setItem("nombreSala", roomname.value );
+    });
+}
 
 
 </script>

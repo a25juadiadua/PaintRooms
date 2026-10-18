@@ -9,12 +9,17 @@ import Swal from 'sweetalert2';
 
 
 const entrarPaint = ref(false);
+const nombreGuardado = localStorage.getItem("nombreUsuario");
+const salaGuardada = localStorage.getItem("nombreSala");
 
 const socket = io('http://localhost:3000');
 
 socket.on ('connect', () =>{
   console.log('Conectado al servidor:' , socket.id);
 
+  if (nombreGuardado != null && salaGuardada != null) {
+        socket.emit("nombre:opcion:sala", nombreGuardado, true, salaGuardada);
+    }
   
   
 });
@@ -43,6 +48,8 @@ socket.on("error:usuario", (usuario, mensaje) => {
     window.location.reload();
   });
 });
+
+
 </script>
 
 <template>

@@ -73,6 +73,26 @@ onMounted (() => {
 
     ctx = canvas.value.getContext("2d");
 
+
+    props.socket.on("datos:sala",(datos) => {
+        
+        ctx.beginPath();
+
+        datos.forEach((element) => {
+            
+            if(element.Inicio === true){
+                ctx.moveTo(element.X, element.Y);
+
+            }else{
+
+                ctx.lineTo(element.X, element.Y);
+            }
+        });
+
+        ctx.stroke();
+    });
+
+
     props.socket.on('dibujo:inicio', (datos) => {
         ctx.beginPath();
         ctx.moveTo(datos.x, datos.y);

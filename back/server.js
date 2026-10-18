@@ -39,8 +39,8 @@ io.on('connection', (socket) => {
             Salas[sala] = {
                 Users : 1,
                 MaxPlayer: 5,
-                Usuarios : new Map()
-                
+                Usuarios : new Map(),
+                Dibujos: []
             };
 
             Salas[sala].Usuarios.set(socket.id, nombre);
@@ -86,7 +86,8 @@ io.on('connection', (socket) => {
 
             socket.join(sala);
             socket.emit("nombre:ok");
-            io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios);
+            socket.emit("datos:sala", Salas[sala].Dibujos);
+            io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios,);
 
             console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
@@ -106,7 +107,8 @@ io.on('connection', (socket) => {
             let y = datos.y;
     
             let sala = Usuarios[socket.id].room;
-    
+            Salas[sala].Dibujos.push({X: x, Y: y, Inicio: true});
+
             io.to(sala).emit('dibujo:inicio',{ x, y});
         }else{
             socket.emit(
@@ -125,7 +127,9 @@ io.on('connection', (socket) => {
             let y = datos.y;
         
             let sala = Usuarios[socket.id].room;
-        
+            
+            Salas[sala].Dibujos.push({X: x, Y: y, Inicio: false});
+
             io.to(sala).emit('dibujo:mover', { x, y });
         }else{
             socket.emit(
