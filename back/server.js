@@ -45,7 +45,10 @@ io.on('connection', (socket) => {
 
             Salas[sala].Usuarios.set(socket.id, nombre);
             socket.join(sala);
-            console.log("Salas del socket:", socket.rooms);
+            
+            socket.emit("nombre:ok");
+            io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios);
+
 
             console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
@@ -82,7 +85,8 @@ io.on('connection', (socket) => {
             Salas[sala].Users++;
 
             socket.join(sala);
-            console.log("Salas del socket:", socket.rooms);
+            socket.emit("nombre:ok");
+            io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios);
 
             console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
@@ -122,7 +126,11 @@ io.on('connection', (socket) => {
         
             let sala = Usuarios[socket.id].room;
         
-            socket.to(sala).emit('dibujo:mover', {x, y});
+            io.to(sala).emit('dibujo:mover', {
+                id: socket.id,
+                nombre: Usuarios[socket.id].name,
+                posX: x,
+                posY: y});
         }else{
             socket.emit(
         "error:usuario",
@@ -133,9 +141,31 @@ io.on('connection', (socket) => {
 });
 
 
+socket.on("cursor:mover", (datos) => {
+
+    if(Usuarios[socket.id]) {
+        let x = datos.x;
+            let y = datos.y;
+        
+            let sala = Usuarios[socket.id].room;
+        
+            io.to(sala).emit('cursor:mover', {
+                id: socket.id,
+                nombre: Usuarios[socket.id].name,
+                posX: x,
+                posY: y});
+        }else{
+            socket.emit(
+        "error:usuario",
+        "Usuario desconocido",
+        "Ha habido un error con el usuario"
+    );
+    }
+})
+
     //------------------------------------- DESCONEXION DE USUARIO ---------------------------------------
 
-    socket.on("disconnect", (sala) => {
+    socket.on("disconnect", () => {
 
         if (Usuarios[socket.id]) {
             sala = Usuarios[socket.id].room;
@@ -145,11 +175,16 @@ io.on('connection', (socket) => {
         Salas[sala].Users--;
         console.log("Usuario eliminado de la sala y contador de sala borrados");
 
+        
         if(Salas[sala].Users <= 0){
             delete Salas[sala];
             console.log("Sala borrada porque no hay jugadores");
+            
+        }else{
+            
+            io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios);
         }
-
+        
         delete Usuarios[socket.id];
         console.log("Usuario borrado");
         }

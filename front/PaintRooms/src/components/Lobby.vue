@@ -7,7 +7,7 @@ let roomname = ref("");
 const pantalla = ref("nombre");
 const opcionSala = ref(null);
 
-function guardarNombre(nombre){
+function guardarNombre(){
     
     console.log ("Nombre: ", username.value );
     pantalla.value = "opciones";
@@ -21,6 +21,8 @@ function opcionUsuarioSala(){
 function enviarDatos(nombre, opcionSalaUsuario,sala){
     console.log ("Datos Usuario: ", username.value, opcionSalaUsuario, sala );
     props.socket.emit("nombre:opcion:sala", nombre, opcionSalaUsuario, sala);
+
+    
 }
 
 

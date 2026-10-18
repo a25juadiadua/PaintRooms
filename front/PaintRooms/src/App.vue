@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 
 import {io} from 'socket.io-client';
 import Lobby from './components/Lobby.vue';
@@ -7,6 +8,7 @@ import Swal from 'sweetalert2';
 
 
 
+const entrarPaint = ref(false);
 
 const socket = io('http://localhost:3000');
 
@@ -14,6 +16,11 @@ socket.on ('connect', () =>{
   console.log('Conectado al servidor:' , socket.id);
 
   
+  
+});
+
+socket.on("nombre:ok", () => {
+    entrarPaint.value = true;
 });
 
 socket.on("error:sala", (sala, mensaje) => {
@@ -26,19 +33,21 @@ socket.on("error:sala", (sala, mensaje) => {
 });
 
 
+
 socket.on("error:usuario", (usuario, mensaje) => {
   Swal.fire({
     icon: 'error',
-    title: `${usuario}`,
+    title: usuario,
     text: mensaje
+  }).then(() => {
+    window.location.reload();
   });
-
-})
+});
 </script>
 
 <template>
 
-<Lobby :socket = socket></Lobby>
-<Paint :socket="socket" />
+<Lobby v-if="entrarPaint === false" :socket = socket></Lobby>
+<Paint v-else :socket="socket" />
 
 </template>
