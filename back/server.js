@@ -19,6 +19,8 @@ let Salas = {};
 io.on('connection', (socket) => {
     console.log('Usuario conectado');
 
+
+    // ---------------------- COMPROBACION DE ERRORES Y CREACION DE SALA Y USUARIOS ------------------------------
     socket.on("nombre:opcion:sala", (nombre, opcionSala, sala) => {
     console.log(nombre, opcionSala, sala);
 
@@ -42,6 +44,8 @@ io.on('connection', (socket) => {
             };
 
             Salas[sala].Usuarios.set(socket.id, nombre);
+            socket.join(sala);
+            console.log("Salas del socket:", socket.rooms);
 
             console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
@@ -61,7 +65,7 @@ io.on('connection', (socket) => {
                 socket.emit("error:sala", sala, "No s'ha encontrat la sala");
                 console.log("Sala no encontrada y usuario no añadido");
             }
-        else if(Salas[sala].Users > Salas[sala].MaxPlayer){
+        else if(Salas[sala].Users >= Salas[sala].MaxPlayer){
                 socket.emit("error:sala", sala, "La sala esta al maxim de jugadors");
                 console.log("Sala encontrada pero supera el limite de jugadores");
             }
@@ -77,6 +81,9 @@ io.on('connection', (socket) => {
             Salas[sala].Usuarios.set(socket.id, nombre);
             Salas[sala].Users++;
 
+            socket.join(sala);
+            console.log("Salas del socket:", socket.rooms);
+
             console.log("-------------------------------------------------------");
             console.log("Usuarios: " , Usuarios);
             console.log("-------------------------------------------------------------------");
@@ -84,6 +91,49 @@ io.on('connection', (socket) => {
         }
     }
     });
+
+
+    //------------------------------------- ENVIAR LAS CORDENADAS A LA SALA CORRESPONDIENTE --------------------
+    socket.on('dibujo:inicio', (datos) => {
+
+        if(Usuarios[socket.id]){
+
+            let x = datos.x;
+            let y = datos.y;
+    
+            let sala = Usuarios[socket.id].room;
+    
+            socket.to(sala).emit('dibujo:inicio',{ x, y});
+        }else{
+            socket.emit(
+        "error:usuario",
+        "Usuario desconocido",
+        "Ha habido un error con el usuario"
+    );
+        }
+});
+
+    socket.on('dibujo:mover', (datos) => {
+
+        if(Usuarios[socket.id]){
+
+            let x = datos.x;
+            let y = datos.y;
+        
+            let sala = Usuarios[socket.id].room;
+        
+            socket.to(sala).emit('dibujo:mover', {x, y});
+        }else{
+            socket.emit(
+        "error:usuario",
+        "Usuario desconocido",
+        "Ha habido un error con el usuario"
+    );
+        }
+});
+
+
+    //------------------------------------- DESCONEXION DE USUARIO ---------------------------------------
 
     socket.on("disconnect", (sala) => {
 
