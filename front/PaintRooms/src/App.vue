@@ -54,7 +54,7 @@ socket.on("error:usuario", (usuario, mensaje) => {
 
 <template>
 
-<Lobby v-if="entrarPaint === false" :socket = socket></Lobby>
-<Paint v-else :socket="socket" />
+<Lobby v-if="entrarPaint === false" :socket = socket ></Lobby>
+<Paint v-else :socket="socket " :swal = Swal />
 
 </template>

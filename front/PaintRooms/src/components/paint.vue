@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 
 const canvas = ref(null);
 
-const props = defineProps(['socket']);
+const props = defineProps(['socket', 'swal']);
 
 let ctx = null;
 
@@ -59,6 +59,30 @@ function moverDibujo(event){
 
 function terminarDibujo(){
     estaDibujando = false;
+}
+
+
+    
+function desconectarUsuario() {
+
+    props.swal.fire({
+        title: "¿Estás seguro?",
+        text: "Volverás al inicio de la página",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.removeItem("nombreUsuario");
+            localStorage.removeItem("nombreSala");
+
+            props.socket.disconnect();
+            window.location.reload();
+        }
+    });
 }
 
 //-------------------------------- OnMounted -------------------------------
@@ -184,6 +208,8 @@ props.socket.on("cursor:eliminar", (id) => {
                 <span class="tip-icon">✎</span>
                 Mantén pulsado para dibujar
             </p>
+
+            <button @click="desconectarUsuario()" class="btn btn-danger">Desconectar</button>
         </nav>
 
     </div>

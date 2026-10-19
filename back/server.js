@@ -172,9 +172,25 @@ socket.on("cursor:mover", (datos) => {
 
             console.log("Sala encontrada");
             io.to(sala).emit("cursor:eliminar", (socket.id));
-        Salas[sala].Usuarios.delete(socket.id);
-        Salas[sala].Users--;
-        console.log("Usuario eliminado de la sala y contador de sala borrados");
+
+            if(Usuarios[socket.id].adminSala === true && Salas[sala].Users >= 2){
+
+                Salas[sala].Usuarios.delete(socket.id);
+                Salas[sala].Users--;
+
+                const idSiguienteAdmin = Salas[sala].Usuarios.keys().next().value;
+
+                Usuarios[idSiguienteAdmin].adminSala = true;
+
+                console.log("Usuario eliminado y nuevo admin en la sala y contador de sala borrados");
+
+            }else{
+
+                Salas[sala].Usuarios.delete(socket.id);
+                Salas[sala].Users--;
+                console.log("Usuario eliminado de la sala y contador de sala borrados");
+            }
+
 
         
         if(Salas[sala].Users <= 0){
@@ -186,6 +202,7 @@ socket.on("cursor:mover", (datos) => {
             io.to(sala).emit("info:sala", sala, Salas[sala].Users, Salas[sala].MaxPlayer, Salas[sala].Usuarios);
         }
         
+
         delete Usuarios[socket.id];
         console.log("Usuario borrado");
         }
