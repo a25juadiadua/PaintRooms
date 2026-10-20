@@ -55,6 +55,7 @@ function guardarNombreSala(){
         <!-- Pantalla 1: nombre -->
         <div id="divNombre" v-if="pantalla === 'nombre'" class="card border-0 shadow-lg rounded-4 mx-auto w-100" style="max-width: 450px;">
 
+            
             <div class="card-body p-4 p-md-5">
 
                 <form @submit.prevent="guardarNombre(username)" >
@@ -72,6 +73,7 @@ function guardarNombreSala(){
         <!-- Pantalla 2: opciones -->
         <div id="escogerOCrearSala" v-if="pantalla === 'opciones'" class="card border-0 shadow-lg rounded-4 mx-auto w-100" style="max-width: 450px;">
 
+            
             <div class="card-body p-4 p-md-5">
 
                 <h2 class="h3 fw-bold text-center text-dark mb-4">Que opción quieres?</h2>

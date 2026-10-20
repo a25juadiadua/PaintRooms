@@ -107,7 +107,10 @@ io.on('connection', (socket) => {
             let y = datos.y;
     
             let sala = Usuarios[socket.id].room;
-            Salas[sala].Dibujos.push({X: x, Y: y, Inicio: true});
+            Salas[sala].Dibujos.push({X: x,
+                 Y: y,
+                Inicio: true,
+                Usuario: socket.id});
 
             io.to(sala).emit('dibujo:inicio',{ x, y});
         }else{
@@ -128,7 +131,10 @@ io.on('connection', (socket) => {
         
             let sala = Usuarios[socket.id].room;
             
-            Salas[sala].Dibujos.push({X: x, Y: y, Inicio: false});
+            Salas[sala].Dibujos.push({X: x,
+                 Y: y,
+                Inicio: false,
+                Usuario: socket.id});
 
             io.to(sala).emit('dibujo:mover', { x, y });
         }else{
@@ -139,6 +145,7 @@ io.on('connection', (socket) => {
     );
         }
 });
+
 
 
 socket.on("cursor:mover", (datos) => {
@@ -163,6 +170,13 @@ socket.on("cursor:mover", (datos) => {
     }
 });
 
+socket.on("dibujo:borrar", () => {
+    let sala = Usuarios[socket.id].room;
+
+    Salas[sala].Dibujos = Salas[sala].Dibujos.filter(dibujo => dibujo.Usuario !== socket.id);
+
+    io.to(sala).emit("dibujo:borrar", Salas[sala].Dibujos);
+});
     //------------------------------------- DESCONEXION DE USUARIO ---------------------------------------
 
     socket.on("disconnect", () => {

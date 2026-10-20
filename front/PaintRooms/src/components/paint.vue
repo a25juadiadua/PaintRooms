@@ -85,6 +85,11 @@ function desconectarUsuario() {
     });
 }
 
+function borrar(){
+    
+    props.socket.emit("dibujo:borrar");
+}
+
 //-------------------------------- OnMounted -------------------------------
 
 onMounted (() => {
@@ -209,6 +214,7 @@ props.socket.on("cursor:eliminar", (id) => {
                 Mantén pulsado para dibujar
             </p>
 
+            <button @click="borrar()" class="btn btn-primary">Esborrar</button>
             <button @click="desconectarUsuario()" class="btn btn-danger">Desconectar</button>
         </nav>
 

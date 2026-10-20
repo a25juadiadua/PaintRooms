@@ -33,7 +33,9 @@ socket.on("error:sala", (sala, mensaje) => {
     icon: 'error',
     title: `Error con la sala ${sala}`,
     text: mensaje
-  });
+  }).then(() => {
+    window.location.reload();
+  });;
 
 });
 
