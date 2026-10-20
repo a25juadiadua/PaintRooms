@@ -35,6 +35,8 @@ socket.on("error:sala", (sala, mensaje) => {
     text: mensaje
   }).then(() => {
     window.location.reload();
+    localStorage.removeItem("nombreUsuario");
+    localStorage.removeItem("nombreSala");
   });;
 
 });

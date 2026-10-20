@@ -13,9 +13,26 @@ const nombreRoom = ref("");
 const maxPlayers = ref(0);
 const users = ref([]);
 const countPlayer = ref(0);
+const cursores = ref({});
 const posX = ref(0);
 const posY = ref(0);
-const cursores = ref({});
+let ultimaX = 0;
+let ultimaY = 0;
+
+
+setInterval(() => {
+    if (posX.value !== ultimaX || posY.value !== ultimaY) {
+
+
+        props.socket.emit('cursor:mover', {
+            x: posX.value,
+            y: posY.value
+        });
+
+        ultimaX = posX.value;
+        ultimaY = posY.value;
+    }
+}, 50);
 
 
 // ------------------------------- FUNCIONES -----------------------------
@@ -43,18 +60,15 @@ function moverDibujo(event){
 
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
-
+        
         props.socket.emit('dibujo:mover', {
-            x: event.offsetX,
-            y: event.offsetY
-        });
+    x: event.offsetX,
+    y: event.offsetY
+});
     }
-
-        props.socket.emit('cursor:mover', {
-            x: event.offsetX,
-            y: event.offsetY
-        });
     
+    posX.value = event.offsetX;
+    posY.value = event.offsetY;
 }
 
 function terminarDibujo(){
@@ -105,20 +119,20 @@ onMounted (() => {
 
     props.socket.on("datos:sala",(datos) => {
         
-        ctx.beginPath();
-
+        
         datos.forEach((element) => {
             
             if(element.Inicio === true){
+                ctx.beginPath();
                 ctx.moveTo(element.X, element.Y);
 
             }else{
 
                 ctx.lineTo(element.X, element.Y);
+                ctx.stroke();
             }
         });
 
-        ctx.stroke();
     });
 
 
@@ -131,6 +145,29 @@ onMounted (() => {
         
         ctx.lineTo(datos.x, datos.y);
         ctx.stroke();
+    });
+
+    props.socket.on("dibujo:borrar", (datos) => {
+
+
+        ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
+
+        
+        datos.forEach((element) => {
+            
+            if(element.Inicio === true){
+                ctx.beginPath();
+                ctx.moveTo(element.X, element.Y);
+
+            }else{
+
+                ctx.lineTo(element.X, element.Y);
+                ctx.stroke();
+            }
+        });
+
+    
+
     });
 
     props.socket.on("info:sala",( nombreSala, jugadoresSala, maxJuagdor, usarios) => {
@@ -214,8 +251,15 @@ props.socket.on("cursor:eliminar", (id) => {
                 Mantén pulsado para dibujar
             </p>
 
-            <button @click="borrar()" class="btn btn-primary">Esborrar</button>
-            <button @click="desconectarUsuario()" class="btn btn-danger">Desconectar</button>
+            <div class="room-buttons">
+    <button @click="borrar()" class="btn-borrar">
+        Esborrar
+    </button>
+
+    <button @click="desconectarUsuario()" class="btn-desconectar">
+        Desconectar
+    </button>
+</div>
         </nav>
 
     </div>
@@ -351,4 +395,46 @@ canvas {
     color: #2eaf7d;
     font-size: 17px;
 }
+
+
+.room-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.btn-borrar,
+.btn-desconectar {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-borrar {
+    color: #ffffff;
+    background: #2eaf7d;
+    border: 1px solid #2eaf7d;
+}
+
+.btn-borrar:hover {
+    background: #258f66;
+    border-color: #258f66;
+}
+
+.btn-desconectar {
+    color: #c03939;
+    background: #ffffff;
+    border: 1px solid #e5bcbc;
+}
+
+.btn-desconectar:hover {
+    background: #fff1f1;
+    border-color: #c03939;
+}
+
 </style>

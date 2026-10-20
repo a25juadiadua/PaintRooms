@@ -171,12 +171,18 @@ socket.on("cursor:mover", (datos) => {
 });
 
 socket.on("dibujo:borrar", () => {
-    let sala = Usuarios[socket.id].room;
 
-    Salas[sala].Dibujos = Salas[sala].Dibujos.filter(dibujo => dibujo.Usuario !== socket.id);
+    
 
-    io.to(sala).emit("dibujo:borrar", Salas[sala].Dibujos);
+        let sala = Usuarios[socket.id].room;
+    
+        Salas[sala].Dibujos = Salas[sala].Dibujos.filter(dibujo => dibujo.Usuario !== socket.id);
+    
+        io.to(sala).emit("dibujo:borrar", Salas[sala].Dibujos);
+    
 });
+
+
     //------------------------------------- DESCONEXION DE USUARIO ---------------------------------------
 
     socket.on("disconnect", () => {
