@@ -17,7 +17,7 @@ function guardarNombre(){
     }else{
         props.swal.fire({
     icon: 'error',
-    title: "No hi ha cap nop",
+    title: "No hi ha cap nom",
     text: "Posa un nom"
   });
     }
@@ -32,17 +32,29 @@ function enviarDatos(nombre, opcionSalaUsuario,sala){
     console.log ("Datos Usuario: ", username.value, opcionSalaUsuario, sala );
     
     guardarNombreSala();
-
-    props.socket.emit("nombre:opcion:sala", nombre, opcionSalaUsuario, sala);
+    
+    if(roomname.value.trim() != "" && username.value.trim() != "" ){
+        
+        props.socket.emit("nombre:opcion:sala", nombre, opcionSalaUsuario, sala);
+    }
 
 }
 
 function guardarNombreSala(){
 
-    props.socket.on("nombre:ok", () => {
-        localStorage.setItem("nombreUsuario", username.value);
-        localStorage.setItem("nombreSala", roomname.value );
-    });
+    if(roomname.value.trim() != ""){
+
+        props.socket.on("nombre:ok", () => {
+            localStorage.setItem("nombreUsuario", username.value);
+            localStorage.setItem("nombreSala", roomname.value );
+        });
+    }else{
+        props.swal.fire({
+    icon: 'error',
+    title: "No hi ha cap nom de la sala",
+    text: "Posa un nom"
+  });
+    }
 }
 
 

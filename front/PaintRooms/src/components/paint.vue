@@ -16,6 +16,7 @@ const countPlayer = ref(0);
 const cursores = ref({});
 const posX = ref(0);
 const posY = ref(0);
+const colorUsuario = ref("");
 let ultimaX = 0;
 let ultimaY = 0;
 
@@ -47,17 +48,19 @@ function empezarDibujo(event){
     
     ctx.beginPath();
     ctx.moveTo(event.offsetX, event.offsetY);
+    ctx.strokeStyle = colorUsuario;
 
     props.socket.emit('dibujo:inicio', {
     x: event.offsetX,
-    y: event.offsetY
+    y: event.offsetY,
+    
 });
 }
 
 function moverDibujo(event){
 
     if(estaDibujando){
-
+        ctx.strokeStyle = colorUsuario;
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
         
@@ -102,6 +105,10 @@ function desconectarUsuario() {
 function borrar(){
     
     props.socket.emit("dibujo:borrar");
+}
+
+function obtenerColor(){
+    console.log(colorUsuario.value);
 }
 
 //-------------------------------- OnMounted -------------------------------
@@ -251,6 +258,9 @@ props.socket.on("cursor:eliminar", (id) => {
                 Mantén pulsado para dibujar
             </p>
 
+            <div>
+                <input type="color" name="color" id="color" v-model="color" @input="obtenerColor()">
+            </div>
             <div class="room-buttons">
     <button @click="borrar()" class="btn-borrar">
         Esborrar
