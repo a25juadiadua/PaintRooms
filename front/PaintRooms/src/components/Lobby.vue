@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps(['socket']);
+const props = defineProps(['socket', 'swal']);
 import {ref} from 'vue';
 
 let username = ref("");
@@ -10,7 +10,17 @@ const opcionSala = ref(null);
 function guardarNombre(){
     
     console.log ("Nombre: ", username.value );
-    pantalla.value = "opciones";
+
+    if(username.value.trim() != ""){
+
+        pantalla.value = "opciones";
+    }else{
+        props.swal.fire({
+    icon: 'error',
+    title: "No hi ha cap nop",
+    text: "Posa un nom"
+  });
+    }
 }
 
 function opcionUsuarioSala(){
