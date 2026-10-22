@@ -17,6 +17,8 @@ const cursores = ref({});
 const posX = ref(0);
 const posY = ref(0);
 const colorUsuario = ref("#000000");
+const grosorPincel = ref(3);
+const panelVisible = ref(true);
 let ultimaX = 0;
 let ultimaY = 0;
 
@@ -38,42 +40,51 @@ setInterval(() => {
 
 // ------------------------------- FUNCIONES -----------------------------
 
+
+// Funcion Canva Pantalla
 function ajustarCanvas() {
     props.socket.emit("dibujo:solicitar");
 
-    
+
     canvas.value.width = window.innerWidth;
     canvas.value.height = window.innerHeight;
 
     
 }
 
+
+// FUNCIONES SOCKETS ENVIO DE DATOS
 function empezarDibujo(event){
     estaDibujando = true;
     
     ctx.beginPath();
+    ctx.lineWidth = grosorPincel.value;
     ctx.strokeStyle = colorUsuario.value;
     ctx.moveTo(event.offsetX, event.offsetY);
 
     props.socket.emit('dibujo:inicio', {
     x: event.offsetX,
     y: event.offsetY,
-    color: colorUsuario.value
-    
+    color: colorUsuario.value,
+    grosor: grosorPincel.value 
 });
 }
 
 function moverDibujo(event){
 
     if(estaDibujando){
+        ctx.lineWidth = grosorPincel.value;
         ctx.strokeStyle = colorUsuario.value;
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
+
         
+ 
         props.socket.emit('dibujo:mover', {
     x: event.offsetX,
     y: event.offsetY,
-    color: colorUsuario.value
+    color: colorUsuario.value,
+    grosor: grosorPincel.value
 });
     }
     
@@ -86,7 +97,7 @@ function terminarDibujo(){
 }
 
 
-    
+// DESCONECTAR USUARIO
 function desconectarUsuario() {
 
     props.swal.fire({
@@ -109,14 +120,13 @@ function desconectarUsuario() {
     });
 }
 
+// BORRAR
 function borrar(){
     
     props.socket.emit("dibujo:borrar");
 }
 
-function obtenerColor(){
-    console.log(colorUsuario.value);
-}
+
 
 //-------------------------------- OnMounted -------------------------------
 
@@ -130,7 +140,7 @@ onMounted (() => {
 
     ctx = canvas.value.getContext("2d");
 
-    
+    //DATOS DE LA SALA
     props.socket.on("datos:sala",(datos) => {
         
         
@@ -138,10 +148,12 @@ onMounted (() => {
             
             if(element.Inicio === true){
                 ctx.beginPath();
+                ctx.lineWidth = element.grosor;
                 ctx.strokeStyle = element.color;
                 ctx.moveTo(element.X, element.Y);
                 
             }else{
+                ctx.lineWidth = element.grosor;
                 ctx.strokeStyle = element.color;
                 ctx.lineTo(element.X, element.Y);
                 ctx.stroke();
@@ -151,19 +163,24 @@ onMounted (() => {
     });
     
 
+    //INICIO DE DIBUJO
     props.socket.on('dibujo:inicio', (datos) => {
         ctx.beginPath();
         ctx.moveTo(datos.x, datos.y);
         ctx.strokeStyle = datos.color;
+        ctx.lineWidth = datos.grosor;
     });
 
+    //CUANDO SE MUEVE EL RATON
     props.socket.on('dibujo:mover', (datos) => {
-        
+        console.log("Datos recibidos en Vue:", datos);
+        ctx.lineWidth = datos.grosor;
         ctx.strokeStyle = datos.color;
         ctx.lineTo(datos.x, datos.y);
         ctx.stroke();
     });
 
+    //CUANDO EL USUARIO QUIERE BORRAR SU PARTE
     props.socket.on("dibujo:borrar", (datos) => {
 
 
@@ -174,10 +191,12 @@ onMounted (() => {
             
             if(element.Inicio === true){
                 ctx.beginPath();
+                ctx.lineWidth = element.grosor
                 ctx.strokeStyle = element.color;
                 ctx.moveTo(element.X, element.Y);
 
             }else{
+                ctx.lineWidth = element.grosor
                 ctx.strokeStyle = element.color;
                 ctx.lineTo(element.X, element.Y);
                 ctx.stroke();
@@ -188,6 +207,8 @@ onMounted (() => {
 
     });
 
+
+    //INFORMACION DE LA SALA
     props.socket.on("info:sala",( nombreSala, jugadoresSala, maxJuagdor, usarios) => {
         nombreRoom.value = nombreSala;
         maxPlayers.value = maxJuagdor;
@@ -195,9 +216,10 @@ onMounted (() => {
         countPlayer.value = jugadoresSala;
     });
 
+    //MOVER EL CURSOR CON EL NOMBRE
    props.socket.on("cursor:mover", (datos) => {
     let color;
-
+    console.log("Grosor recibido:", datos.grosor);
     if (cursores.value[datos.id]) {
         color = cursores.value[datos.id].color;
     } else {
@@ -219,6 +241,8 @@ props.socket.on("cursor:eliminar", (id) => {
 
 })
 </script>
+
+
 
 
 <template>
@@ -243,7 +267,14 @@ props.socket.on("cursor:eliminar", (id) => {
             </div>
         </div>
 
-        <nav class="room-panel">
+        <!-- Botón para mostrar y ocultar el panel -->
+        <button class="btn-panel"
+            @click="panelVisible = !panelVisible">
+            {{ panelVisible ? '✕' : '☰' }}
+        </button>
+
+        <nav class="room-panel" v-if="panelVisible">
+
             <div class="room-heading">
                 <span class="status-dot"></span>
                 <span>SALA ACTIVA</span>
@@ -253,7 +284,7 @@ props.socket.on("cursor:eliminar", (id) => {
 
             <div class="room-info">
                 <div class="info-item">
-                    <span>Jugadores</span>
+                    <span>Jugadores conectados</span>
                     <strong>{{ countPlayer }} / {{ maxPlayers }}</strong>
                 </div>
 
@@ -269,28 +300,61 @@ props.socket.on("cursor:eliminar", (id) => {
                 Mantén pulsado para dibujar
             </p>
 
-            <div class="color-selector">
-    <label for="color">Color del pincel</label>
+            <div class="panel-divider"></div>
 
-    <div class="color-input">
-        <input type="color" name="color" id="color" v-model="colorUsuario" @input="obtenerColor()">
+            <section class="drawing-controls">
+                <h3>Herramientas</h3>
 
-        <span>{{ colorUsuario }}</span>
-    </div>
-</div>
+                <div class="color-selector">
+                    <label for="color">Color del pincel</label>
+
+                    <div class="color-input">
+                        <input type="color"
+                            name="color"
+                            id="color"
+                            v-model="colorUsuario">
+
+                        <span>{{ colorUsuario }}</span>
+                    </div>
+                </div>
+
+                <div class="thickness-selector">
+                    <div class="thickness-heading">
+                        <label for="grosor">Grosor del pincel</label>
+                        <span class="thickness-value">{{ grosorPincel }} px</span>
+                    </div>
+
+                    <input type="range"
+                        name="grosor"
+                        id="grosor"
+                        v-model="grosorPincel"
+                        min="1"
+                        max="20">
+                </div>
+            </section>
+
             <div class="room-buttons">
-    <button @click="borrar()" class="btn-borrar">
-        Esborrar
-    </button>
+                <button @click="borrar()" class="btn-borrar">
+                    <span>⌫</span>
+                    Borrar dibujo
+                </button>
 
-    <button @click="desconectarUsuario()" class="btn-desconectar">
-        Desconectar
-    </button>
-</div>
+                <button @click="desconectarUsuario()" class="btn-desconectar">
+                    <span>↪</span>
+                    Desconectar
+                </button>
+            </div>
+
+            <div class="panel-footer">
+                PaintRooms <span>·</span> Espacio colaborativo
+            </div>
+
         </nav>
 
     </div>
 </template>
+
+
 
 <style scoped>
 .canvas-container {
@@ -504,4 +568,108 @@ canvas {
     font-weight: 600;
     text-transform: uppercase;
 }
+
+
+.panel-divider {
+    height: 1px;
+    margin: 18px 0;
+    background: #eef0f2;
+}
+
+.drawing-controls h3 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #172b4d;
+}
+
+.color-input {
+    min-width: 0;
+}
+
+.color-input span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.thickness-selector {
+    margin-top: 18px;
+}
+
+.thickness-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.thickness-heading label {
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.thickness-value {
+    padding: 4px 7px;
+    border-radius: 6px;
+    background: #eaf7f1;
+    color: #258f66;
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.thickness-selector input[type="range"] {
+    width: 100%;
+    accent-color: #2eaf7d;
+    cursor: pointer;
+}
+
+.room-buttons button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.room-buttons button span {
+    font-size: 16px;
+}
+
+.panel-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #eef0f2;
+    color: #98a2b3;
+    font-size: 10px;
+    text-align: center;
+}
+
+.panel-footer span {
+    padding: 0 3px;
+    color: #2eaf7d;
+}
+
+.btn-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #e3e5e8;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #172b4d;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px #172b4d15;
+}
+
+.btn-panel:hover {
+    background: #eaf7f1;
+    color: #258f66;
+}
+
 </style>

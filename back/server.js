@@ -101,9 +101,9 @@ io.on('connection', (socket) => {
     //------------------------------------- ENVIAR LAS CORDENADAS A LA SALA CORRESPONDIENTE --------------------
 
     socket.on('dibujo:solicitar' ,() => {
-        let sala = Usuarios[socket.id].room;
+        
 
-        socket.emit('datos:sala', Salas[sala].Dibujos);
+        socket.emit('datos:sala', Salas[Usuarios[socket.id].room].Dibujos);
     });
 
     socket.on('dibujo:inicio', (datos) => {
@@ -113,16 +113,18 @@ io.on('connection', (socket) => {
             let x = datos.x;
             let y = datos.y;
             let color = datos.color;
+            let grosor = datos.grosor;
     
             let sala = Usuarios[socket.id].room;
             Salas[sala].Dibujos.push({X: x,
                  Y: y,
                 Inicio: true,
                 Usuario: socket.id,
-                color: datos.color
+                color: datos.color,
+                grosor: datos.grosor
             });
 
-            io.to(sala).emit('dibujo:inicio',{ x, y, color});
+            io.to(sala).emit('dibujo:inicio',{ x, y, color, grosor});
         }else{
             socket.emit(
         "error:usuario",
@@ -133,12 +135,14 @@ io.on('connection', (socket) => {
 });
 
     socket.on('dibujo:mover', (datos) => {
+        
 
         if(Usuarios[socket.id]){
 
             let x = datos.x;
             let y = datos.y;
             let color = datos.color;
+            let grosor = datos.grosor;
 
             let sala = Usuarios[socket.id].room;
             
@@ -146,10 +150,11 @@ io.on('connection', (socket) => {
                  Y: y,
                 Inicio: false,
                 Usuario: socket.id,
-                color: datos.color
+                color: datos.color,
+                grosor: datos.grosor
             });
-
-            io.to(sala).emit('dibujo:mover', { x, y, color });
+            
+            io.to(sala).emit('dibujo:mover', { x, y, color, grosor });
         }else{
             socket.emit(
         "error:usuario",
