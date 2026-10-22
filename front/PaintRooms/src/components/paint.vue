@@ -39,8 +39,13 @@ setInterval(() => {
 // ------------------------------- FUNCIONES -----------------------------
 
 function ajustarCanvas() {
+    props.socket.emit("dibujo:solicitar");
+
+    
     canvas.value.width = window.innerWidth;
     canvas.value.height = window.innerHeight;
+
+    
 }
 
 function empezarDibujo(event){
@@ -125,7 +130,7 @@ onMounted (() => {
 
     ctx = canvas.value.getContext("2d");
 
-
+    
     props.socket.on("datos:sala",(datos) => {
         
         
@@ -135,16 +140,16 @@ onMounted (() => {
                 ctx.beginPath();
                 ctx.strokeStyle = element.color;
                 ctx.moveTo(element.X, element.Y);
-
+                
             }else{
                 ctx.strokeStyle = element.color;
                 ctx.lineTo(element.X, element.Y);
                 ctx.stroke();
             }
         });
-
+        
     });
-
+    
 
     props.socket.on('dibujo:inicio', (datos) => {
         ctx.beginPath();

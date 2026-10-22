@@ -99,6 +99,13 @@ io.on('connection', (socket) => {
 
 
     //------------------------------------- ENVIAR LAS CORDENADAS A LA SALA CORRESPONDIENTE --------------------
+
+    socket.on('dibujo:solicitar' ,() => {
+        let sala = Usuarios[socket.id].room;
+
+        socket.emit('datos:sala', Salas[sala].Dibujos);
+    });
+
     socket.on('dibujo:inicio', (datos) => {
 
         if(Usuarios[socket.id]){
