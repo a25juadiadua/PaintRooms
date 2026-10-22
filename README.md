@@ -72,8 +72,6 @@ git clone https://github.com/a25juadiadua/PaintRooms
 cd PaintRooms
 ```
 
-Sustituye https://github.com/a25juadiadua/PaintRooms por la URL real de tu repositorio.
-
 ### 2. Iniciar el backend
 
 Abre una terminal y ejecuta:
