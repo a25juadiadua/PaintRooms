@@ -1,73 +1,78 @@
-# 🎨 PaintRooms
+# PaintRooms 🎨
 
-### Un lienzo compartido, muchas ideas y una misma sala.
+PaintRooms es una aplicación web de dibujo colaborativo en tiempo real. Permite que varios usuarios se conecten a una misma sala, compartan un lienzo y vean los dibujos y movimientos de los cursores de los demás usuarios.
 
-PaintRooms es una aplicación web colaborativa que permite a varios usuarios compartir un espacio de dibujo en tiempo real. Cada persona puede crear una sala o unirse a una existente para dibujar y ver cómo los demás participantes dan vida al mismo lienzo.
-
-El proyecto nace con una idea sencilla: **dibujar juntos, desde distintos navegadores, y compartir la creatividad en tiempo real.**
-
----
+El proyecto está desarrollado con Vue 3 en el frontend y Node.js, Express y Socket.IO en el backend.
 
 ## ✨ Funcionalidades
 
-- 👤 **Identificación de usuarios:** cada participante puede elegir su nombre de usuario.
-- 🏠 **Creación de salas:** permite crear una sala nueva para empezar a dibujar.
-- 🚪 **Unirse a una sala:** los usuarios pueden entrar en una sala existente.
-- 👥 **Gestión de participantes:** cada sala admite hasta 5 usuarios.
-- 🖌️ **Dibujo colaborativo:** los trazos se comparten en tiempo real entre los usuarios de una misma sala.
-- 🖱️ **Cursores en tiempo real:** permite ver el movimiento de los demás participantes en el lienzo.
-- 💾 **Recuperación de los dibujos:** los nuevos participantes reciben los trazos que ya se han realizado en su sala.
-- 🔄 **Recuperación de sesión:** el nombre del usuario y la sala se guardan en `localStorage` para facilitar la vuelta a la sala después de actualizar la página.
-- ⚠️ **Gestión de errores:** se muestran avisos cuando se producen problemas al crear o acceder a una sala.
+- **Gestión de salas:** crear una sala nueva o entrar en una sala existente mediante su nombre.
+- **Usuarios:** elegir un nombre de usuario para participar en la sala.
+- **Dibujo colaborativo:** dibujar en un lienzo compartido y visualizar los trazos de otros usuarios en tiempo real.
+- **Personalización del pincel:** seleccionar el color y ajustar el grosor del trazo.
+- **Cursores en tiempo real:** visualizar la posición y el nombre de los demás participantes.
+- **Información de la sala:** consultar el nombre de la sala, los jugadores conectados y la capacidad máxima.
+- **Borrar el dibujo:** limpiar el lienzo compartido.
+- **Desconexión:** salir de la sala mediante una confirmación.
+- **Recuperación de sesión:** guardar el nombre de usuario y la sala en `localStorage` para recuperar los datos al actualizar la página.
+- **Interfaz visual:** panel de herramientas con los controles de dibujo y la información de la sala.
 
 ## 🛠️ Tecnologías utilizadas
 
-| Tecnología | Uso |
-|---|---|
-| Vue 3 | Interfaz de usuario y componentes |
-| Vite | Servidor de desarrollo del frontend |
-| Node.js | Entorno de ejecución del backend |
-| Express | Configuración del servidor |
-| Socket.IO | Comunicación en tiempo real |
-| HTML5 Canvas | Dibujo sobre el lienzo |
-| Bootstrap | Diseño y estilos de la interfaz |
-| SweetAlert2 | Alertas y mensajes de error |
-| localStorage | Persistencia local de los datos de sesión |
+### Frontend
+- Vue 3
+- Vite
+- JavaScript
+- HTML5 Canvas
+- CSS
+- Socket.IO Client
+- SweetAlert2
 
-## 📂 Estructura del proyecto
+### Backend
+- Node.js
+- Express
+- Socket.IO
+
+## 📁 Estructura del proyecto
 
 ```text
 PaintRooms/
 ├── back/
-│   ├── server.js
-│   └── package.json
+│   ├── package.json
+│   └── server.js
 │
 └── front/
     └── PaintRooms/
+        ├── package.json
+        ├── index.html
         ├── src/
+        │   ├── App.vue
         │   ├── components/
         │   │   ├── Lobby.vue
         │   │   └── paint.vue
-        │   └── App.vue
-        ├── package.json
+        │   └── ...
         └── ...
 ```
 
-El backend gestiona las conexiones, los usuarios, las salas y la distribución de los dibujos. El frontend contiene la interfaz, el lobby y el lienzo colaborativo.
+La estructura de los archivos puede variar según los componentes y carpetas añadidos durante el desarrollo.
 
-## 🚀 Cómo ejecutar el proyecto
+## 🚀 Instalación y ejecución
 
 ### Requisitos previos
 
-- Node.js y npm instalados.
-- El repositorio clonado en tu equipo.
+- Node.js
+- npm
 
-### 1. Clonar el repositorio
+### 1. Descargar el proyecto
+
+Clona el repositorio y accede a la carpeta principal:
 
 ```bash
-git clone https://github.com/a25juadiadua/PaintRooms.git
+git clone https://github.com/a25juadiadua/PaintRooms
 cd PaintRooms
 ```
+
+Sustituye https://github.com/a25juadiadua/PaintRooms por la URL real de tu repositorio.
 
 ### 2. Iniciar el backend
 
@@ -79,11 +84,11 @@ npm install
 npm run dev
 ```
 
-El servidor se iniciará en el puerto `3000`.
+El servidor Socket.IO utiliza el puerto `3000`.
 
 ### 3. Iniciar el frontend
 
-Abre una segunda terminal desde la carpeta raíz del repositorio:
+Abre una segunda terminal y ejecuta:
 
 ```bash
 cd front/PaintRooms
@@ -91,51 +96,57 @@ npm install
 npm run dev
 ```
 
-Vite mostrará la dirección local del frontend, normalmente:
+Vite iniciará el servidor de desarrollo, normalmente en:
 
+```text
 http://localhost:5173
+```
 
-Abre esa dirección en el navegador para empezar a utilizar PaintRooms.
+Abre esa dirección en el navegador. Para comprobar el dibujo colaborativo, puedes abrir la aplicación en dos pestañas o ventanas y entrar en la misma sala con usuarios distintos.
 
-> **Importante:** el backend y el frontend deben estar ejecutándose simultáneamente para que funcione la comunicación en tiempo real.
+## 🔄 Comunicación en tiempo real
 
-## 🔌 Comunicación en tiempo real
+La comunicación entre el frontend y el backend se realiza mediante eventos de Socket.IO.
 
-PaintRooms utiliza Socket.IO para mantener conectados a los participantes y transmitir los eventos de cada sala.
+Entre los eventos utilizados se encuentran:
 
-Entre las operaciones principales se encuentran:
+| Evento | Función |
+|---|---|
+| `nombre:opcion:sala` | Enviar los datos para crear o entrar en una sala. |
+| `nombre:ok` | Confirmar el acceso del usuario. |
+| `error:sala` | Comunicar un error relacionado con la sala. |
+| `error:usuario` | Comunicar un error relacionado con el usuario. |
+| `dibujo:inicio` | Indicar el inicio de un trazo. |
+| `dibujo:mover` | Enviar los puntos del dibujo. |
+| `dibujo:solicitar` | Solicitar los dibujos guardados de la sala. |
+| `datos:sala` | Recibir los datos de los dibujos de la sala. |
+| `dibujo:borrar` | Gestionar el borrado y la actualización del lienzo. |
+| `cursor:mover` | Actualizar la posición de un cursor. |
+| `cursor:eliminar` | Eliminar el cursor de un usuario desconectado. |
+| `info:sala` | Recibir información sobre la sala y sus participantes. |
 
-- La creación de salas y la incorporación de usuarios.
-- La actualización de la información de los participantes.
-- El envío de las coordenadas del dibujo.
-- La sincronización de los movimientos de los cursores.
-- La recuperación de los trazos almacenados en la sala.
+Los eventos permiten que el servidor gestione la comunicación entre los usuarios de una misma sala.
 
-Cada sala mantiene sus propios usuarios y dibujos, de modo que la actividad de una sala no se transmite a las demás.
+## 🖌️ Funcionamiento del dibujo
 
-## 💾 Persistencia de los datos
+El lienzo se implementa mediante HTML5 Canvas.
 
-El proyecto combina dos mecanismos de almacenamiento:
+Cuando un usuario empieza a dibujar, se registra el punto inicial, el color y el grosor del pincel. Durante el movimiento del ratón, se envían las coordenadas al servidor, que distribuye los datos a los usuarios de la sala.
 
-- **`localStorage`:** conserva localmente el nombre de usuario y el nombre de la sala para facilitar la recuperación de la sesión tras actualizar la página.
-- **Memoria del servidor:** mantiene los datos de las salas y los dibujos mientras el proceso del backend sigue activo.
+Los trazos se almacenan en el servidor para poder reconstruir el dibujo cuando un usuario solicita los datos de la sala.
 
-Los dibujos todavía no se guardan en una base de datos permanente. Si el servidor se reinicia, los datos que conserva en memoria se pierden.
+## 📌 Estado del proyecto
 
-## 🧭 Estado del proyecto
+El proyecto se encuentra en desarrollo. Las funcionalidades implementadas incluyen la gestión de salas, el dibujo compartido, los cursores, la personalización del pincel y los controles principales de la interfaz.
 
-PaintRooms continúa en desarrollo. La base de la aplicación ya permite crear y compartir espacios de dibujo, intercambiar trazos en tiempo real y recuperar el contenido de una sala al incorporarse a ella.
+Entre las posibles mejoras se encuentran:
 
-Los siguientes pasos se centran en mejorar la gestión de las sesiones, controlar la salida voluntaria de las salas y terminar de pulir el comportamiento de la aplicación.
+- Optimizar el envío de puntos del dibujo para reducir el número de mensajes.
+- Mejorar la limpieza de eventos y temporizadores al salir del componente.
+- Revisar el comportamiento del lienzo al cambiar el tamaño de la ventana.
+- Mejorar la experiencia de uso en dispositivos táctiles.
+- Seguir mejorando la interfaz y los controles del panel de herramientas.
 
-## 🎯 Objetivo
+## 👨‍💻 Autor
 
-Este proyecto es una oportunidad para poner en práctica el desarrollo de aplicaciones web con Vue, la comunicación bidireccional mediante WebSockets y la gestión de usuarios y salas en un entorno colaborativo.
-
-Más allá de dibujar, PaintRooms representa el proceso de aprender, probar, corregir y construir algo paso a paso.
-
----
-
-**Hecho con código, paciencia y muchas ganas de seguir aprendiendo.** 💚
-
-
+Proyecto desarrollado como práctica de desarrollo de aplicaciones web con Vue 3, Node.js y Socket.IO.
