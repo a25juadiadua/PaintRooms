@@ -105,14 +105,17 @@ io.on('connection', (socket) => {
 
             let x = datos.x;
             let y = datos.y;
+            let color = datos.color;
     
             let sala = Usuarios[socket.id].room;
             Salas[sala].Dibujos.push({X: x,
                  Y: y,
                 Inicio: true,
-                Usuario: socket.id});
+                Usuario: socket.id,
+                color: datos.color
+            });
 
-            io.to(sala).emit('dibujo:inicio',{ x, y});
+            io.to(sala).emit('dibujo:inicio',{ x, y, color});
         }else{
             socket.emit(
         "error:usuario",
@@ -128,15 +131,18 @@ io.on('connection', (socket) => {
 
             let x = datos.x;
             let y = datos.y;
-        
+            let color = datos.color;
+
             let sala = Usuarios[socket.id].room;
             
             Salas[sala].Dibujos.push({X: x,
                  Y: y,
                 Inicio: false,
-                Usuario: socket.id});
+                Usuario: socket.id,
+                color: datos.color
+            });
 
-            io.to(sala).emit('dibujo:mover', { x, y });
+            io.to(sala).emit('dibujo:mover', { x, y, color });
         }else{
             socket.emit(
         "error:usuario",

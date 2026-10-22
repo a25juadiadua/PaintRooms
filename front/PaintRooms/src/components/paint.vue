@@ -16,7 +16,7 @@ const countPlayer = ref(0);
 const cursores = ref({});
 const posX = ref(0);
 const posY = ref(0);
-const colorUsuario = ref("");
+const colorUsuario = ref("#000000");
 let ultimaX = 0;
 let ultimaY = 0;
 
@@ -47,12 +47,13 @@ function empezarDibujo(event){
     estaDibujando = true;
     
     ctx.beginPath();
+    ctx.strokeStyle = colorUsuario.value;
     ctx.moveTo(event.offsetX, event.offsetY);
-    ctx.strokeStyle = colorUsuario;
 
     props.socket.emit('dibujo:inicio', {
     x: event.offsetX,
     y: event.offsetY,
+    color: colorUsuario.value
     
 });
 }
@@ -60,13 +61,14 @@ function empezarDibujo(event){
 function moverDibujo(event){
 
     if(estaDibujando){
-        ctx.strokeStyle = colorUsuario;
+        ctx.strokeStyle = colorUsuario.value;
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
         
         props.socket.emit('dibujo:mover', {
     x: event.offsetX,
-    y: event.offsetY
+    y: event.offsetY,
+    color: colorUsuario.value
 });
     }
     
@@ -131,10 +133,11 @@ onMounted (() => {
             
             if(element.Inicio === true){
                 ctx.beginPath();
+                ctx.strokeStyle = element.color;
                 ctx.moveTo(element.X, element.Y);
 
             }else{
-
+                ctx.strokeStyle = element.color;
                 ctx.lineTo(element.X, element.Y);
                 ctx.stroke();
             }
@@ -146,10 +149,12 @@ onMounted (() => {
     props.socket.on('dibujo:inicio', (datos) => {
         ctx.beginPath();
         ctx.moveTo(datos.x, datos.y);
+        ctx.strokeStyle = datos.color;
     });
 
     props.socket.on('dibujo:mover', (datos) => {
         
+        ctx.strokeStyle = datos.color;
         ctx.lineTo(datos.x, datos.y);
         ctx.stroke();
     });
@@ -164,10 +169,11 @@ onMounted (() => {
             
             if(element.Inicio === true){
                 ctx.beginPath();
+                ctx.strokeStyle = element.color;
                 ctx.moveTo(element.X, element.Y);
 
             }else{
-
+                ctx.strokeStyle = element.color;
                 ctx.lineTo(element.X, element.Y);
                 ctx.stroke();
             }
@@ -258,9 +264,15 @@ props.socket.on("cursor:eliminar", (id) => {
                 Mantén pulsado para dibujar
             </p>
 
-            <div>
-                <input type="color" name="color" id="color" v-model="color" @input="obtenerColor()">
-            </div>
+            <div class="color-selector">
+    <label for="color">Color del pincel</label>
+
+    <div class="color-input">
+        <input type="color" name="color" id="color" v-model="colorUsuario" @input="obtenerColor()">
+
+        <span>{{ colorUsuario }}</span>
+    </div>
+</div>
             <div class="room-buttons">
     <button @click="borrar()" class="btn-borrar">
         Esborrar
@@ -447,4 +459,44 @@ canvas {
     border-color: #c03939;
 }
 
+
+.color-selector {
+    margin-top: 18px;
+}
+
+.color-selector label {
+    display: block;
+    margin-bottom: 8px;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.color-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid #e3e5e8;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.color-input input[type="color"] {
+    width: 32px;
+    height: 32px;
+    padding: 2px;
+    border: 1px solid #e3e5e8;
+    border-radius: 6px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.color-input span {
+    color: #172b4d;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 </style>
